@@ -46,32 +46,32 @@ async function updateData() {
   }
 }
 
-app.get('/api/health', (req: Request, res: Response) => {
-  res.json({
+app.get('/api/health', (_req: Request, res: Response) => {
+  return res.json({
     status: 'ok',
     timestamp: new Date(),
     lastUpdate: cachedData?.lastUpdate
   });
 });
 
-app.get('/api/polymarket/markets', (req: Request, res: Response) => {
+app.get('/api/polymarket/markets', (_req: Request, res: Response) => {
   if (!cachedData) {
     return res.status(503).json({ error: 'Data not yet available' });
   }
 
-  res.json({
+  return res.json({
     markets: cachedData.polymarketMarkets,
     count: cachedData.polymarketMarkets.length,
     lastUpdate: cachedData.lastUpdate
   });
 });
 
-app.get('/api/opinion/markets', (req: Request, res: Response) => {
+app.get('/api/opinion/markets', (_req: Request, res: Response) => {
   if (!cachedData) {
     return res.status(503).json({ error: 'Data not yet available' });
   }
 
-  res.json({
+  return res.json({
     markets: cachedData.opinionMarkets,
     count: cachedData.opinionMarkets.length,
     lastUpdate: cachedData.lastUpdate
@@ -94,7 +94,7 @@ app.get('/api/matches', (req: Request, res: Response) => {
     );
   }
 
-  res.json({
+  return res.json({
     matches,
     count: matches.length,
     lastUpdate: cachedData.lastUpdate
@@ -126,7 +126,7 @@ app.get('/api/arbitrage', (req: Request, res: Response) => {
 
   const stats = arbitrageService.calculateStats(opportunities);
 
-  res.json({
+  return res.json({
     opportunities,
     count: opportunities.length,
     stats,
@@ -134,14 +134,14 @@ app.get('/api/arbitrage', (req: Request, res: Response) => {
   });
 });
 
-app.get('/api/stats', (req: Request, res: Response) => {
+app.get('/api/stats', (_req: Request, res: Response) => {
   if (!cachedData) {
     return res.status(503).json({ error: 'Data not yet available' });
   }
 
   const stats = arbitrageService.calculateStats(cachedData.arbitrageOpportunities);
 
-  res.json({
+  return res.json({
     polymarketMarketsCount: cachedData.polymarketMarkets.length,
     opinionMarketsCount: cachedData.opinionMarkets.length,
     matchesCount: cachedData.matches.length,
@@ -151,13 +151,13 @@ app.get('/api/stats', (req: Request, res: Response) => {
   });
 });
 
-app.post('/api/refresh', async (req: Request, res: Response) => {
+app.post('/api/refresh', async (_req: Request, res: Response) => {
   try {
     await updateData();
-    res.json({ success: true, message: 'Data refreshed' });
+    return res.json({ success: true, message: 'Data refreshed' });
   } catch (error) {
     logger.error('Error refreshing data:', error);
-    res.status(500).json({ error: 'Failed to refresh data' });
+    return res.status(500).json({ error: 'Failed to refresh data' });
   }
 });
 
