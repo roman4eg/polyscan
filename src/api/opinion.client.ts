@@ -48,35 +48,35 @@ export class OpinionClient {
   private setupInterceptors(): void {
     this.api.interceptors.request.use(
       config => {
-        logger.info('Opinion API Request:', {
-          url: config.url,
-          method: config.method,
-          headers: JSON.stringify(config.headers),
-          params: JSON.stringify(config.params)
-        });
+        logger.info('=== Opinion API Request ===');
+        logger.info(`URL: ${config.url}`);
+        logger.info(`Method: ${config.method}`);
+        logger.info(`Headers: ${JSON.stringify(config.headers, null, 2)}`);
+        logger.info(`Params: ${JSON.stringify(config.params, null, 2)}`);
+        logger.info('===========================');
         return config;
       }
     );
 
     this.api.interceptors.response.use(
       response => {
-        logger.info('Opinion API Response:', {
-          url: response.config.url,
-          status: response.status,
-          data: JSON.stringify(response.data)
-        });
+        logger.info('=== Opinion API Response ===');
+        logger.info(`URL: ${response.config.url}`);
+        logger.info(`Status: ${response.status}`);
+        logger.info(`Data: ${JSON.stringify(response.data, null, 2)}`);
+        logger.info('============================');
         return response;
       },
       error => {
-        logger.error('Opinion API Error:', {
-          url: error.config?.url,
-          method: error.config?.method,
-          headers: JSON.stringify(error.config?.headers),
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          message: error.message,
-          responseData: JSON.stringify(error.response?.data)
-        });
+        logger.error('=== Opinion API Error ===');
+        logger.error(`URL: ${error.config?.url}`);
+        logger.error(`Method: ${error.config?.method}`);
+        logger.error(`Headers: ${JSON.stringify(error.config?.headers, null, 2)}`);
+        logger.error(`Status: ${error.response?.status}`);
+        logger.error(`Status Text: ${error.response?.statusText}`);
+        logger.error(`Error Message: ${error.message}`);
+        logger.error(`Response Data: ${JSON.stringify(error.response?.data, null, 2)}`);
+        logger.error('=========================');
         return Promise.reject(error);
       }
     );
