@@ -18,12 +18,18 @@ export class OpinionClient {
   private api: AxiosInstance;
   private readonly CACHE_PREFIX = 'opinion:';
   private readonly apiKey: string;
+  private readonly eoaAddress: string;
 
   constructor() {
     this.apiKey = process.env.OPINION_API_KEY || '';
+    this.eoaAddress = process.env.OPINION_EOA_ADDRESS || '';
 
     if (!this.apiKey) {
       logger.warn('OPINION_API_KEY not set. API requests may fail.');
+    }
+
+    if (!this.eoaAddress) {
+      logger.warn('OPINION_EOA_ADDRESS not set. API requests may fail.');
     }
 
     this.api = axios.create({
@@ -31,7 +37,8 @@ export class OpinionClient {
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
-        'apikey': this.apiKey
+        'apikey': this.apiKey,
+        'address': this.eoaAddress
       }
     });
 
