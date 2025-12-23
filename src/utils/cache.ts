@@ -12,13 +12,20 @@ class CacheManager {
         port: parseInt(process.env.REDIS_PORT || '6379'),
         password: process.env.REDIS_PASSWORD || undefined,
         retryStrategy: (times) => {
+          if (times > 3) {
+            logger.warn('Redis unavailable after 3 attempts. Running without cache.');
+            return null;
+          }
           const delay = Math.min(times * 50, 2000);
           return delay;
-        }
+        },
+        maxRetriesPerRequest: 1
       });
 
       this.redis.on('error', (err) => {
-        logger.error('Redis connection error:', err);
+        if (!err.message.includes('ECONNREFUSED')) {
+          logger.error('Redis connection error:', err);
+        }
         this.enabled = false;
       });
 

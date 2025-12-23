@@ -27,7 +27,7 @@ export class OpinionClient {
     }
 
     this.api = axios.create({
-      baseURL: 'https://openapi.opinion.trade/openapi',
+      baseURL: 'https://proxy.opinion.trade:8443/openapi',
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
