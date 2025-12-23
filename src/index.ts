@@ -1,12 +1,14 @@
+import dotenv from 'dotenv';
+
+// Load environment variables FIRST, before any other imports
+dotenv.config();
+
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import logger from './utils/logger';
 import marketsService from './services/markets.service';
 import matchingService from './services/matching.service';
 import arbitrageService from './services/arbitrage.service';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
