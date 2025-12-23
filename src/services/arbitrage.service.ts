@@ -107,7 +107,7 @@ export class ArbitrageService {
   }
 
   private calculateArbitrage(
-    type: string,
+    _type: string,
     price1: number,
     price2: number,
     volume1?: number,
