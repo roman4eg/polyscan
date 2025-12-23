@@ -46,14 +46,36 @@ export class OpinionClient {
   }
 
   private setupInterceptors(): void {
+    this.api.interceptors.request.use(
+      config => {
+        logger.debug('Opinion API request:', {
+          url: config.url,
+          method: config.method,
+          headers: config.headers,
+          params: config.params
+        });
+        return config;
+      }
+    );
+
     this.api.interceptors.response.use(
-      response => response,
+      response => {
+        logger.debug('Opinion API response:', {
+          url: response.config.url,
+          status: response.status,
+          data: response.data
+        });
+        return response;
+      },
       error => {
         logger.error('Opinion API error:', {
           url: error.config?.url,
+          method: error.config?.method,
+          headers: error.config?.headers,
           status: error.response?.status,
+          statusText: error.response?.statusText,
           message: error.message,
-          data: error.response?.data
+          responseData: error.response?.data
         });
         return Promise.reject(error);
       }
