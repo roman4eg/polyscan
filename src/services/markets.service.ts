@@ -142,10 +142,10 @@ export class MarketsService {
 
       // Only add outcome if we have real prices from orderbook
       if (yesAsk !== null && noAsk !== null) {
-        // Create ONE outcome with real YES and NO ask prices
+        // Create ONE outcome with standardized "Yes/No" structure
         outcomes.push({
           id: market.marketId.toString(),
-          name: market.marketTitle,
+          name: 'Yes',  // Standardized name for matching with Polymarket
           yesPrice: yesAsk,
           noPrice: noAsk,
           yesAsk: yesAsk,
