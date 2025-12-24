@@ -15,10 +15,13 @@ export class MatchingService {
   findMatches(polymarkets: NormalizedMarket[], opinionMarkets: NormalizedMarket[]): MarketMatch[] {
     const matches: MarketMatch[] = [];
 
+    logger.info(`Starting matching: ${polymarkets.length} Polymarket markets vs ${opinionMarkets.length} Opinion markets`);
+
     for (const polyMarket of polymarkets) {
       const bestMatch = this.findBestMatch(polyMarket, opinionMarkets);
       if (bestMatch) {
         matches.push(bestMatch);
+        logger.info(`Match found: "${polyMarket.title}" <-> "${bestMatch.opinionMarket.title}" (similarity: ${bestMatch.similarity.toFixed(2)})`);
       }
     }
 
@@ -29,9 +32,13 @@ export class MatchingService {
   private findBestMatch(polyMarket: NormalizedMarket, opinionMarkets: NormalizedMarket[]): MarketMatch | null {
     let bestMatch: MarketMatch | null = null;
     let bestSimilarity = 0;
+    const candidates: Array<{ title: string; similarity: number }> = [];
 
     for (const opinionMarket of opinionMarkets) {
       const similarity = this.calculateMarketSimilarity(polyMarket, opinionMarket);
+
+      // Collect top candidates for logging
+      candidates.push({ title: opinionMarket.title, similarity });
 
       if (similarity > bestSimilarity && similarity >= this.SIMILARITY_THRESHOLD) {
         const outcomeMatches = this.matchOutcomes(polyMarket.outcomes, opinionMarket.outcomes);
@@ -47,6 +54,15 @@ export class MatchingService {
           };
         }
       }
+    }
+
+    // Log top 3 candidates if no match found
+    if (!bestMatch && candidates.length > 0) {
+      const topCandidates = candidates
+        .sort((a, b) => b.similarity - a.similarity)
+        .slice(0, 3);
+
+      logger.debug(`No match for "${polyMarket.title}". Top candidates: ${topCandidates.map(c => `"${c.title}" (${c.similarity.toFixed(2)})`).join(', ')}`);
     }
 
     return bestMatch;
