@@ -111,8 +111,12 @@ export class OpinionClient {
         params: defaultParams
       });
 
+      logger.info(`Opinion API raw response: ${JSON.stringify(response.data, null, 2)}`);
+
       if (response.data.code !== 0) {
-        throw new Error(`Opinion API error: ${response.data.msg}`);
+        const errorMsg = `Opinion API returned error code ${response.data.code}: ${response.data.msg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
       const markets = response.data.result.list;
@@ -121,7 +125,17 @@ export class OpinionClient {
       logger.info(`Fetched ${markets.length} Opinion markets`);
       return markets;
     } catch (error) {
-      logger.error('Error fetching Opinion markets:', error);
+      if (axios.isAxiosError(error)) {
+        logger.error('Axios error details:', {
+          message: error.message,
+          code: error.code,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      } else {
+        logger.error('Error fetching Opinion markets:', error);
+      }
       throw error;
     }
   }
@@ -169,13 +183,25 @@ export class OpinionClient {
       });
 
       if (response.data.code !== 0) {
-        throw new Error(`Opinion API error: ${response.data.msg}`);
+        const errorMsg = `Opinion API returned error code ${response.data.code}: ${response.data.msg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
       await cache.set(cacheKey, response.data.result, 30);
       return response.data.result;
     } catch (error) {
-      logger.error(`Error fetching orderbook for token ${tokenId}:`, error);
+      if (axios.isAxiosError(error)) {
+        logger.error(`Axios error details for orderbook ${tokenId}:`, {
+          message: error.message,
+          code: error.code,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      } else {
+        logger.error(`Error fetching orderbook for token ${tokenId}:`, error);
+      }
       return null;
     }
   }
