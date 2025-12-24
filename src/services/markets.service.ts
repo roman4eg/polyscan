@@ -19,7 +19,11 @@ export class MarketsService {
 
       return normalized;
     } catch (error) {
-      logger.error('Error getting Polymarket markets:', error);
+      if (error instanceof Error) {
+        logger.error(`Error getting Polymarket markets: ${error.message}`);
+      } else {
+        logger.error(`Error getting Polymarket markets: ${String(error)}`);
+      }
       return [];
     }
   }
@@ -33,7 +37,11 @@ export class MarketsService {
 
       return normalized;
     } catch (error) {
-      logger.error('Error getting Opinion markets:', error);
+      if (error instanceof Error) {
+        logger.error(`Error getting Opinion markets: ${error.message}`);
+      } else {
+        logger.error(`Error getting Opinion markets: ${String(error)}`);
+      }
       return [];
     }
   }

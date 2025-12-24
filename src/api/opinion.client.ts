@@ -126,15 +126,18 @@ export class OpinionClient {
       return markets;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        logger.error('Axios error details:', {
+        const errorDetails = {
           message: error.message,
           code: error.code,
           status: error.response?.status,
           statusText: error.response?.statusText,
           data: error.response?.data
-        });
+        };
+        logger.error(`Axios error details: ${JSON.stringify(errorDetails, null, 2)}`);
+      } else if (error instanceof Error) {
+        logger.error(`Error fetching Opinion markets: ${error.message}`);
       } else {
-        logger.error('Error fetching Opinion markets:', error);
+        logger.error(`Error fetching Opinion markets: ${String(error)}`);
       }
       throw error;
     }
@@ -163,7 +166,11 @@ export class OpinionClient {
       logger.info(`Fetched total ${allMarkets.length} Opinion markets`);
       return allMarkets;
     } catch (error) {
-      logger.error('Error fetching all Opinion markets:', error);
+      if (error instanceof Error) {
+        logger.error(`Error fetching all Opinion markets: ${error.message}`);
+      } else {
+        logger.error(`Error fetching all Opinion markets: ${String(error)}`);
+      }
       return allMarkets;
     }
   }
@@ -192,15 +199,18 @@ export class OpinionClient {
       return response.data.result;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        logger.error(`Axios error details for orderbook ${tokenId}:`, {
+        const errorDetails = {
           message: error.message,
           code: error.code,
           status: error.response?.status,
           statusText: error.response?.statusText,
           data: error.response?.data
-        });
+        };
+        logger.error(`Axios error for orderbook ${tokenId}: ${JSON.stringify(errorDetails, null, 2)}`);
+      } else if (error instanceof Error) {
+        logger.error(`Error fetching orderbook for token ${tokenId}: ${error.message}`);
       } else {
-        logger.error(`Error fetching orderbook for token ${tokenId}:`, error);
+        logger.error(`Error fetching orderbook for token ${tokenId}: ${String(error)}`);
       }
       return null;
     }
