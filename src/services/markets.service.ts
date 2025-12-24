@@ -31,9 +31,24 @@ export class MarketsService {
   async getOpinionMarkets(): Promise<NormalizedMarket[]> {
     try {
       const markets = await opinionClient.getAllMarkets();
-      const normalized = await Promise.all(
-        markets.map(market => this.normalizeOpinionMarket(market))
-      );
+
+      // Process markets in batches to avoid rate limiting
+      const BATCH_SIZE = 5; // Process 5 markets at a time
+      const DELAY_BETWEEN_BATCHES = 1000; // 1 second delay between batches
+      const normalized: NormalizedMarket[] = [];
+
+      for (let i = 0; i < markets.length; i += BATCH_SIZE) {
+        const batch = markets.slice(i, i + BATCH_SIZE);
+        const batchResults = await Promise.all(
+          batch.map(market => this.normalizeOpinionMarket(market))
+        );
+        normalized.push(...batchResults);
+
+        // Add delay between batches (except for the last batch)
+        if (i + BATCH_SIZE < markets.length) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+        }
+      }
 
       return normalized;
     } catch (error) {
