@@ -87,23 +87,48 @@ export class MarketsService {
   private async normalizeOpinionMarket(market: OpinionMarket): Promise<NormalizedMarket> {
     const outcomes: NormalizedOutcome[] = [];
 
-    for (const childMarket of market.childMarkets) {
+    // Check if this is a multi-outcome market with childMarkets
+    if (market.childMarkets && Array.isArray(market.childMarkets) && market.childMarkets.length > 0) {
+      // Multi-outcome market (marketType: 1)
+      for (const childMarket of market.childMarkets) {
+        const [yesAsk, noAsk, yesVolume, noVolume] = await Promise.all([
+          opinionClient.getBestAskPrice(childMarket.yesTokenId),
+          opinionClient.getBestAskPrice(childMarket.noTokenId),
+          opinionClient.getAvailableVolume(childMarket.yesTokenId, 'ask'),
+          opinionClient.getAvailableVolume(childMarket.noTokenId, 'ask')
+        ]);
+
+        outcomes.push({
+          id: childMarket.marketId.toString(),
+          name: childMarket.marketTitle,
+          yesPrice: yesAsk || 0.5,
+          noPrice: noAsk || 0.5,
+          yesAsk: yesAsk || 0.5,
+          noAsk: noAsk || 0.5,
+          yesTokenId: childMarket.yesTokenId,
+          noTokenId: childMarket.noTokenId,
+          yesVolume,
+          noVolume
+        });
+      }
+    } else if (market.yesTokenId && market.noTokenId) {
+      // Simple yes/no market (marketType: 0)
       const [yesAsk, noAsk, yesVolume, noVolume] = await Promise.all([
-        opinionClient.getBestAskPrice(childMarket.yesTokenId),
-        opinionClient.getBestAskPrice(childMarket.noTokenId),
-        opinionClient.getAvailableVolume(childMarket.yesTokenId, 'ask'),
-        opinionClient.getAvailableVolume(childMarket.noTokenId, 'ask')
+        opinionClient.getBestAskPrice(market.yesTokenId),
+        opinionClient.getBestAskPrice(market.noTokenId),
+        opinionClient.getAvailableVolume(market.yesTokenId, 'ask'),
+        opinionClient.getAvailableVolume(market.noTokenId, 'ask')
       ]);
 
       outcomes.push({
-        id: childMarket.marketId.toString(),
-        name: childMarket.marketTitle,
+        id: market.marketId.toString(),
+        name: market.marketTitle,
         yesPrice: yesAsk || 0.5,
         noPrice: noAsk || 0.5,
         yesAsk: yesAsk || 0.5,
         noAsk: noAsk || 0.5,
-        yesTokenId: childMarket.yesTokenId,
-        noTokenId: childMarket.noTokenId,
+        yesTokenId: market.yesTokenId,
+        noTokenId: market.noTokenId,
         yesVolume,
         noVolume
       });
