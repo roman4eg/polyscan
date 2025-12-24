@@ -4,8 +4,8 @@ import logger from '../utils/logger';
 import cache from '../utils/cache';
 
 interface OpinionApiResponse<T> {
-  code: number;
-  msg: string;
+  errno: number;
+  errmsg: string;
   result: T;
 }
 
@@ -113,8 +113,8 @@ export class OpinionClient {
 
       logger.info(`Opinion API raw response: ${JSON.stringify(response.data, null, 2)}`);
 
-      if (response.data.code !== 0) {
-        const errorMsg = `Opinion API returned error code ${response.data.code}: ${response.data.msg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
+      if (response.data.errno !== 0) {
+        const errorMsg = `Opinion API returned error code ${response.data.errno}: ${response.data.errmsg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
         logger.error(errorMsg);
         throw new Error(errorMsg);
       }
@@ -189,8 +189,8 @@ export class OpinionClient {
         params: { token_id: tokenId }
       });
 
-      if (response.data.code !== 0) {
-        const errorMsg = `Opinion API returned error code ${response.data.code}: ${response.data.msg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
+      if (response.data.errno !== 0) {
+        const errorMsg = `Opinion API returned error code ${response.data.errno}: ${response.data.errmsg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
         logger.error(errorMsg);
         throw new Error(errorMsg);
       }
