@@ -74,23 +74,23 @@ export function ArbitrageTab({ opportunities, loading }: Props) {
                 </div>
               </td>
               <td className="px-4 py-3 text-right font-mono">
-                ${opp.price1.toFixed(3)}
+                ${opp.price1 != null ? opp.price1.toFixed(3) : 'N/A'}
               </td>
               <td className="px-4 py-3 text-right font-mono">
-                ${opp.price2.toFixed(3)}
+                ${opp.price2 != null ? opp.price2.toFixed(3) : 'N/A'}
               </td>
               <td className="px-4 py-3 text-right font-mono">
                 <span className={opp.totalCost < 1 ? 'text-green-600 font-bold' : 'text-red-600'}>
-                  ${opp.totalCost.toFixed(3)}
+                  ${opp.totalCost != null ? opp.totalCost.toFixed(3) : 'N/A'}
                 </span>
               </td>
               <td className="px-4 py-3 text-right">
                 <span className="px-2 py-1 bg-green-100 text-green-800 rounded font-bold">
-                  +{opp.profitPercent.toFixed(2)}%
+                  +{opp.profitPercent != null ? opp.profitPercent.toFixed(2) : '0.00'}%
                 </span>
               </td>
               <td className="px-4 py-3 text-right font-mono">
-                {opp.maxInvestment !== undefined && opp.maxInvestment !== Infinity
+                {opp.maxInvestment != null && opp.maxInvestment !== Infinity
                   ? `$${opp.maxInvestment.toFixed(0)}`
                   : 'Unlimited'}
               </td>
