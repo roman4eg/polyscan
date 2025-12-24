@@ -39,10 +39,14 @@ export interface OpinionMarket {
   status: number;
   statusEnum: string;
   marketType: number;
-  childMarkets: OpinionChildMarket[];
+  childMarkets: OpinionChildMarket[] | null;
+  yesTokenId?: string;  // For simple yes/no markets (marketType: 0)
+  noTokenId?: string;   // For simple yes/no markets (marketType: 0)
+  yesLabel?: string;
+  noLabel?: string;
   volume: string;
-  volume24h: string;
-  volume7d: string;
+  volume24h?: string;
+  volume7d?: string;
   quoteToken: string;
   chainId: string;
 }
