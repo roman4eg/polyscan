@@ -119,6 +119,17 @@ export class OpinionClient {
       }
 
       const markets = response.data.result.list;
+
+      // Log first yes/no market to see structure
+      if (markets.length > 0 && params?.page === 1) {
+        const yesNoMarket = markets.find(m => m.marketType === 0);
+        if (yesNoMarket) {
+          logger.info(`=== Opinion Yes/No Market Sample ===`);
+          logger.info(JSON.stringify(yesNoMarket, null, 2));
+          logger.info(`====================================`);
+        }
+      }
+
       await cache.set(cacheKey, markets, 60);
 
       logger.info(`Fetched ${markets.length} Opinion markets`);
