@@ -120,18 +120,33 @@ export class MarketsService {
         opinionClient.getAvailableVolume(market.noTokenId, 'ask')
       ]);
 
-      outcomes.push({
-        id: market.marketId.toString(),
-        name: market.marketTitle,
-        yesPrice: yesAsk || 0.5,
-        noPrice: noAsk || 0.5,
-        yesAsk: yesAsk || 0.5,
-        noAsk: noAsk || 0.5,
-        yesTokenId: market.yesTokenId,
-        noTokenId: market.noTokenId,
-        yesVolume,
-        noVolume
-      });
+      // Create TWO outcomes for yes/no markets to match Polymarket structure
+      outcomes.push(
+        {
+          id: `${market.marketId}-yes`,
+          name: market.yesLabel || 'Yes',
+          yesPrice: yesAsk || 0.5,
+          noPrice: noAsk || 0.5,
+          yesAsk: yesAsk || 0.5,
+          noAsk: noAsk || 0.5,
+          yesTokenId: market.yesTokenId,
+          noTokenId: market.noTokenId,
+          yesVolume,
+          noVolume
+        },
+        {
+          id: `${market.marketId}-no`,
+          name: market.noLabel || 'No',
+          yesPrice: yesAsk || 0.5,
+          noPrice: noAsk || 0.5,
+          yesAsk: yesAsk || 0.5,
+          noAsk: noAsk || 0.5,
+          yesTokenId: market.yesTokenId,
+          noTokenId: market.noTokenId,
+          yesVolume,
+          noVolume
+        }
+      );
     }
 
     return {
