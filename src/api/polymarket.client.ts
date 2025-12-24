@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { PolymarketMarket, Orderbook, PolymarketOutcome } from '../types/market.types';
-import logger from '../utils/logger';
+// import logger from '../utils/logger';
 import cache from '../utils/cache';
 
 export class PolymarketClient {
