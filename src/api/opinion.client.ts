@@ -46,40 +46,40 @@ export class OpinionClient {
   }
 
   private setupInterceptors(): void {
-    this.api.interceptors.request.use(
-      config => {
-        logger.info('=== Opinion API Request ===');
-        logger.info(`URL: ${config.url}`);
-        logger.info(`Method: ${config.method}`);
-        logger.info(`Headers: ${JSON.stringify(config.headers, null, 2)}`);
-        logger.info(`Params: ${JSON.stringify(config.params, null, 2)}`);
-        logger.info('===========================');
-        return config;
-      }
-    );
+    // this.api.interceptors.request.use(
+    //   config => {
+    //     logger.info('=== Opinion API Request ===');
+    //     logger.info(`URL: ${config.url}`);
+    //     logger.info(`Method: ${config.method}`);
+    //     logger.info(`Headers: ${JSON.stringify(config.headers, null, 2)}`);
+    //     logger.info(`Params: ${JSON.stringify(config.params, null, 2)}`);
+    //     logger.info('===========================');
+    //     return config;
+    //   }
+    // );
 
-    this.api.interceptors.response.use(
-      response => {
-        logger.info('=== Opinion API Response ===');
-        logger.info(`URL: ${response.config.url}`);
-        logger.info(`Status: ${response.status}`);
-        logger.info(`Data: ${JSON.stringify(response.data, null, 2)}`);
-        logger.info('============================');
-        return response;
-      },
-      error => {
-        logger.error('=== Opinion API Error ===');
-        logger.error(`URL: ${error.config?.url}`);
-        logger.error(`Method: ${error.config?.method}`);
-        logger.error(`Headers: ${JSON.stringify(error.config?.headers, null, 2)}`);
-        logger.error(`Status: ${error.response?.status}`);
-        logger.error(`Status Text: ${error.response?.statusText}`);
-        logger.error(`Error Message: ${error.message}`);
-        logger.error(`Response Data: ${JSON.stringify(error.response?.data, null, 2)}`);
-        logger.error('=========================');
-        return Promise.reject(error);
-      }
-    );
+    // this.api.interceptors.response.use(
+    //   response => {
+    //     logger.info('=== Opinion API Response ===');
+    //     logger.info(`URL: ${response.config.url}`);
+    //     logger.info(`Status: ${response.status}`);
+    //     logger.info(`Data: ${JSON.stringify(response.data, null, 2)}`);
+    //     logger.info('============================');
+    //     return response;
+    //   },
+    //   error => {
+    //     logger.error('=== Opinion API Error ===');
+    //     logger.error(`URL: ${error.config?.url}`);
+    //     logger.error(`Method: ${error.config?.method}`);
+    //     logger.error(`Headers: ${JSON.stringify(error.config?.headers, null, 2)}`);
+    //     logger.error(`Status: ${error.response?.status}`);
+    //     logger.error(`Status Text: ${error.response?.statusText}`);
+    //     logger.error(`Error Message: ${error.message}`);
+    //     logger.error(`Response Data: ${JSON.stringify(error.response?.data, null, 2)}`);
+    //     logger.error('=========================');
+    //     return Promise.reject(error);
+    //   }
+    // );
   }
 
   async getMarkets(params?: {
@@ -106,12 +106,12 @@ export class OpinionClient {
         ...params
       };
 
-      logger.info('Fetching Opinion markets', defaultParams);
+      // logger.info('Fetching Opinion markets', defaultParams);
       const response = await this.api.get<OpinionApiResponse<OpinionMarketsResult>>('/market', {
         params: defaultParams
       });
 
-      logger.info(`Opinion API raw response: ${JSON.stringify(response.data, null, 2)}`);
+      // logger.info(`Opinion API raw response: ${JSON.stringify(response.data, null, 2)}`);
 
       if (response.data.errno !== 0) {
         const errorMsg = `Opinion API returned error code ${response.data.errno}: ${response.data.errmsg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
@@ -122,7 +122,7 @@ export class OpinionClient {
       const markets = response.data.result.list;
       await cache.set(cacheKey, markets, 60);
 
-      logger.info(`Fetched ${markets.length} Opinion markets`);
+      // logger.info(`Fetched ${markets.length} Opinion markets`);
       return markets;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -163,7 +163,7 @@ export class OpinionClient {
         }
       }
 
-      logger.info(`Fetched total ${allMarkets.length} Opinion markets`);
+      // logger.info(`Fetched total ${allMarkets.length} Opinion markets`);
       return allMarkets;
     } catch (error) {
       if (error instanceof Error) {
