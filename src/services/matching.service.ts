@@ -74,19 +74,22 @@ export class MatchingService {
       this.normalizeText(market2.title)
     );
 
-    let categorySimilarity = 0;
+    // Only use category similarity if both markets have categories
     if (market1.category && market2.category) {
-      categorySimilarity = this.calculateStringSimilarity(
+      const categorySimilarity = this.calculateStringSimilarity(
         this.normalizeText(market1.category),
         this.normalizeText(market2.category)
       );
+
+      const weightedSimilarity =
+        (titleSimilarity * this.TITLE_WEIGHT) +
+        (categorySimilarity * this.CATEGORY_WEIGHT);
+
+      return weightedSimilarity;
     }
 
-    const weightedSimilarity =
-      (titleSimilarity * this.TITLE_WEIGHT) +
-      (categorySimilarity * this.CATEGORY_WEIGHT);
-
-    return weightedSimilarity;
+    // If one or both markets don't have categories, use title similarity only
+    return titleSimilarity;
   }
 
   private matchOutcomes(outcomes1: NormalizedOutcome[], outcomes2: NormalizedOutcome[]): OutcomeMatch[] {
