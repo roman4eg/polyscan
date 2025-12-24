@@ -98,18 +98,23 @@ export class MarketsService {
           opinionClient.getAvailableVolume(childMarket.noTokenId, 'ask')
         ]);
 
-        outcomes.push({
-          id: childMarket.marketId.toString(),
-          name: childMarket.marketTitle,
-          yesPrice: yesAsk || 0.5,
-          noPrice: noAsk || 0.5,
-          yesAsk: yesAsk || 0.5,
-          noAsk: noAsk || 0.5,
-          yesTokenId: childMarket.yesTokenId,
-          noTokenId: childMarket.noTokenId,
-          yesVolume,
-          noVolume
-        });
+        // Only add outcome if we have real prices from orderbook
+        if (yesAsk !== null && noAsk !== null) {
+          outcomes.push({
+            id: childMarket.marketId.toString(),
+            name: childMarket.marketTitle,
+            yesPrice: yesAsk,
+            noPrice: noAsk,
+            yesAsk: yesAsk,
+            noAsk: noAsk,
+            yesTokenId: childMarket.yesTokenId,
+            noTokenId: childMarket.noTokenId,
+            yesVolume,
+            noVolume
+          });
+        } else {
+          logger.debug(`Skipping outcome "${childMarket.marketTitle}" - no orderbook data (yesAsk: ${yesAsk}, noAsk: ${noAsk})`);
+        }
       }
     } else if (market.yesTokenId && market.noTokenId) {
       // Simple yes/no market (marketType: 0)
@@ -120,33 +125,24 @@ export class MarketsService {
         opinionClient.getAvailableVolume(market.noTokenId, 'ask')
       ]);
 
-      // Create TWO outcomes for yes/no markets to match Polymarket structure
-      outcomes.push(
-        {
-          id: `${market.marketId}-yes`,
-          name: market.yesLabel || 'Yes',
-          yesPrice: yesAsk || 0.5,
-          noPrice: noAsk || 0.5,
-          yesAsk: yesAsk || 0.5,
-          noAsk: noAsk || 0.5,
+      // Only add outcome if we have real prices from orderbook
+      if (yesAsk !== null && noAsk !== null) {
+        // Create ONE outcome with real YES and NO ask prices
+        outcomes.push({
+          id: market.marketId.toString(),
+          name: market.marketTitle,
+          yesPrice: yesAsk,
+          noPrice: noAsk,
+          yesAsk: yesAsk,
+          noAsk: noAsk,
           yesTokenId: market.yesTokenId,
           noTokenId: market.noTokenId,
           yesVolume,
           noVolume
-        },
-        {
-          id: `${market.marketId}-no`,
-          name: market.noLabel || 'No',
-          yesPrice: yesAsk || 0.5,
-          noPrice: noAsk || 0.5,
-          yesAsk: yesAsk || 0.5,
-          noAsk: noAsk || 0.5,
-          yesTokenId: market.yesTokenId,
-          noTokenId: market.noTokenId,
-          yesVolume,
-          noVolume
-        }
-      );
+        });
+      } else {
+        logger.debug(`Skipping market "${market.marketTitle}" - no orderbook data (yesAsk: ${yesAsk}, noAsk: ${noAsk})`);
+      }
     }
 
     return {

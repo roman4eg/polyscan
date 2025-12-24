@@ -58,28 +58,29 @@ export class OpinionClient {
     //   }
     // );
 
-    // this.api.interceptors.response.use(
-    //   response => {
-    //     logger.info('=== Opinion API Response ===');
-    //     logger.info(`URL: ${response.config.url}`);
-    //     logger.info(`Status: ${response.status}`);
-    //     logger.info(`Data: ${JSON.stringify(response.data, null, 2)}`);
-    //     logger.info('============================');
-    //     return response;
-    //   },
-    //   error => {
-    //     logger.error('=== Opinion API Error ===');
-    //     logger.error(`URL: ${error.config?.url}`);
-    //     logger.error(`Method: ${error.config?.method}`);
-    //     logger.error(`Headers: ${JSON.stringify(error.config?.headers, null, 2)}`);
-    //     logger.error(`Status: ${error.response?.status}`);
-    //     logger.error(`Status Text: ${error.response?.statusText}`);
-    //     logger.error(`Error Message: ${error.message}`);
-    //     logger.error(`Response Data: ${JSON.stringify(error.response?.data, null, 2)}`);
-    //     logger.error('=========================');
-    //     return Promise.reject(error);
-    //   }
-    // );
+    this.api.interceptors.response.use(
+      response => {
+        // Only log orderbook requests for debugging
+        if (response.config.url?.includes('/token/orderbook')) {
+          logger.debug('=== Opinion Orderbook Response ===');
+          logger.debug(`Token ID: ${response.config.params?.token_id}`);
+          logger.debug(`Status: ${response.status}`);
+          logger.debug(`Data: ${JSON.stringify(response.data, null, 2)}`);
+          logger.debug('==================================');
+        }
+        return response;
+      },
+      error => {
+        logger.error('=== Opinion API Error ===');
+        logger.error(`URL: ${error.config?.url}`);
+        logger.error(`Method: ${error.config?.method}`);
+        logger.error(`Status: ${error.response?.status}`);
+        logger.error(`Error Message: ${error.message}`);
+        logger.error(`Response Data: ${JSON.stringify(error.response?.data, null, 2)}`);
+        logger.error('=========================');
+        return Promise.reject(error);
+      }
+    );
   }
 
   async getMarkets(params?: {
