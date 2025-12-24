@@ -28,11 +28,17 @@ async function updateData() {
   try {
     logger.info('Starting data update...');
 
+    logger.info('Fetching markets from Polymarket and Opinion...');
     const { polymarket, opinion } = await marketsService.getAllMarkets();
+    logger.info(`Received ${polymarket.length} Polymarket and ${opinion.length} Opinion markets`);
 
+    logger.info('Finding market matches...');
     const matches = matchingService.findMatches(polymarket, opinion);
+    logger.info(`Found ${matches.length} matches`);
 
+    logger.info('Detecting arbitrage opportunities...');
     const arbitrageOpportunities = arbitrageService.detectArbitrage(matches);
+    logger.info(`Detected ${arbitrageOpportunities.length} arbitrage opportunities`);
 
     cachedData = {
       polymarketMarkets: polymarket,
@@ -44,7 +50,12 @@ async function updateData() {
 
     logger.info(`Data updated: ${polymarket.length} Polymarket markets, ${opinion.length} Opinion markets, ${matches.length} matches, ${arbitrageOpportunities.length} arbitrage opportunities`);
   } catch (error) {
-    logger.error('Error updating data:', error);
+    if (error instanceof Error) {
+      logger.error(`Error updating data: ${error.message}`);
+      logger.error(`Stack trace: ${error.stack}`);
+    } else {
+      logger.error(`Error updating data: ${String(error)}`);
+    }
   }
 }
 

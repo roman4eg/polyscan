@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { PolymarketMarket, Orderbook, PolymarketOutcome } from '../types/market.types';
-// import logger from '../utils/logger';
+import logger from '../utils/logger';
 import cache from '../utils/cache';
 
 export class PolymarketClient {
@@ -80,7 +80,7 @@ export class PolymarketClient {
         ...params
       };
 
-      // logger.info('Fetching Polymarket markets', defaultParams);
+      logger.info('Fetching Polymarket markets');
       const response = await this.gammaApi.get<PolymarketMarket[]>('/markets', {
         params: defaultParams
       });
@@ -88,10 +88,12 @@ export class PolymarketClient {
       const markets = response.data.map(market => this.parseMarket(market));
       await cache.set(cacheKey, markets, 60);
 
-      // logger.info(`Fetched ${markets.length} Polymarket markets`);
+      logger.info(`Fetched ${markets.length} Polymarket markets`);
       return markets;
     } catch (error) {
-      // logger.error('Error fetching Polymarket markets:', error);
+      if (error instanceof Error) {
+        logger.error(`Error fetching Polymarket markets: ${error.message}`);
+      }
       throw error;
     }
   }

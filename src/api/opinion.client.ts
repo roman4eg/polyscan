@@ -106,12 +106,10 @@ export class OpinionClient {
         ...params
       };
 
-      // logger.info('Fetching Opinion markets', defaultParams);
+      logger.info('Fetching Opinion markets');
       const response = await this.api.get<OpinionApiResponse<OpinionMarketsResult>>('/market', {
         params: defaultParams
       });
-
-      // logger.info(`Opinion API raw response: ${JSON.stringify(response.data, null, 2)}`);
 
       if (response.data.errno !== 0) {
         const errorMsg = `Opinion API returned error code ${response.data.errno}: ${response.data.errmsg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
@@ -122,7 +120,7 @@ export class OpinionClient {
       const markets = response.data.result.list;
       await cache.set(cacheKey, markets, 60);
 
-      // logger.info(`Fetched ${markets.length} Opinion markets`);
+      logger.info(`Fetched ${markets.length} Opinion markets`);
       return markets;
     } catch (error) {
       if (axios.isAxiosError(error)) {

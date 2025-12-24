@@ -19,11 +19,11 @@ export class MarketsService {
 
       return normalized;
     } catch (error) {
-      // if (error instanceof Error) {
-      //   logger.error(`Error getting Polymarket markets: ${error.message}`);
-      // } else {
-      //   logger.error(`Error getting Polymarket markets: ${String(error)}`);
-      // }
+      if (error instanceof Error) {
+        logger.error(`Error getting Polymarket markets: ${error.message}`);
+      } else {
+        logger.error(`Error getting Polymarket markets: ${String(error)}`);
+      }
       return [];
     }
   }
