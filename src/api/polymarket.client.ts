@@ -32,11 +32,11 @@ export class PolymarketClient {
     this.gammaApi.interceptors.response.use(
       response => response,
       error => {
-        logger.error('Polymarket Gamma API error:', {
-          url: error.config?.url,
-          status: error.response?.status,
-          message: error.message
-        });
+        // logger.error('Polymarket Gamma API error:', {
+        //   url: error.config?.url,
+        //   status: error.response?.status,
+        //   message: error.message
+        // });
         return Promise.reject(error);
       }
     );
@@ -44,11 +44,11 @@ export class PolymarketClient {
     this.clobApi.interceptors.response.use(
       response => response,
       error => {
-        logger.error('Polymarket CLOB API error:', {
-          url: error.config?.url,
-          status: error.response?.status,
-          message: error.message
-        });
+        // logger.error('Polymarket CLOB API error:', {
+        //   url: error.config?.url,
+        //   status: error.response?.status,
+        //   message: error.message
+        // });
         return Promise.reject(error);
       }
     );
@@ -66,7 +66,7 @@ export class PolymarketClient {
     const cached = await cache.get<PolymarketMarket[]>(cacheKey);
 
     if (cached) {
-      logger.debug('Returning cached Polymarket markets');
+      // logger.debug('Returning cached Polymarket markets');
       return cached;
     }
 
@@ -80,7 +80,7 @@ export class PolymarketClient {
         ...params
       };
 
-      logger.info('Fetching Polymarket markets', defaultParams);
+      // logger.info('Fetching Polymarket markets', defaultParams);
       const response = await this.gammaApi.get<PolymarketMarket[]>('/markets', {
         params: defaultParams
       });
@@ -88,10 +88,10 @@ export class PolymarketClient {
       const markets = response.data.map(market => this.parseMarket(market));
       await cache.set(cacheKey, markets, 60);
 
-      logger.info(`Fetched ${markets.length} Polymarket markets`);
+      // logger.info(`Fetched ${markets.length} Polymarket markets`);
       return markets;
     } catch (error) {
-      logger.error('Error fetching Polymarket markets:', error);
+      // logger.error('Error fetching Polymarket markets:', error);
       throw error;
     }
   }
@@ -110,7 +110,7 @@ export class PolymarketClient {
       await cache.set(cacheKey, market, 60);
       return market;
     } catch (error) {
-      logger.error(`Error fetching Polymarket market ${id}:`, error);
+      // logger.error(`Error fetching Polymarket market ${id}:`, error);
       return null;
     }
   }
@@ -124,7 +124,7 @@ export class PolymarketClient {
     }
 
     try {
-      logger.debug(`Fetching orderbook for token ${tokenId}`);
+      // logger.debug(`Fetching orderbook for token ${tokenId}`);
       const response = await this.clobApi.get<Orderbook>('/book', {
         params: { token_id: tokenId }
       });
@@ -132,7 +132,7 @@ export class PolymarketClient {
       await cache.set(cacheKey, response.data, 30);
       return response.data;
     } catch (error) {
-      logger.error(`Error fetching orderbook for token ${tokenId}:`, error);
+      // logger.error(`Error fetching orderbook for token ${tokenId}:`, error);
       return null;
     }
   }
@@ -154,7 +154,7 @@ export class PolymarketClient {
         parsedOutcomes
       };
     } catch (error) {
-      logger.error('Error parsing market outcomes:', error);
+      // logger.error('Error parsing market outcomes:', error);
       return market;
     }
   }

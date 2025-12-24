@@ -93,7 +93,7 @@ export class OpinionClient {
     const cached = await cache.get<OpinionMarket[]>(cacheKey);
 
     if (cached) {
-      logger.debug('Returning cached Opinion markets');
+      // logger.debug('Returning cached Opinion markets');
       return cached;
     }
 
@@ -184,7 +184,7 @@ export class OpinionClient {
     }
 
     try {
-      logger.debug(`Fetching orderbook for token ${tokenId}`);
+      // logger.debug(`Fetching orderbook for token ${tokenId}`);
       const response = await this.api.get<OpinionApiResponse<Orderbook>>('/token/orderbook', {
         params: { token_id: tokenId }
       });
