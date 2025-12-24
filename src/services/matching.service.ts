@@ -52,6 +52,11 @@ export class MatchingService {
             confidence: this.getConfidenceLevel(similarity),
             outcomeMatches
           };
+        } else if (similarity >= 0.95) {
+          // Log why high similarity markets don't match
+          logger.debug(`High similarity (${similarity.toFixed(2)}) but no outcome matches for "${polyMarket.title}"`);
+          logger.debug(`Polymarket outcomes: ${polyMarket.outcomes.map(o => o.name).join(', ')}`);
+          logger.debug(`Opinion outcomes: ${opinionMarket.outcomes.map(o => o.name).join(', ')}`);
         }
       }
     }
