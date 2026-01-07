@@ -15,10 +15,13 @@ export class MatchingService {
   findMatches(polymarkets: NormalizedMarket[], opinionMarkets: NormalizedMarket[]): MarketMatch[] {
     const matches: MarketMatch[] = [];
 
+    logger.info(`Starting matching: ${polymarkets.length} Polymarket markets vs ${opinionMarkets.length} Opinion markets`);
+
     for (const polyMarket of polymarkets) {
       const bestMatch = this.findBestMatch(polyMarket, opinionMarkets);
       if (bestMatch) {
         matches.push(bestMatch);
+        logger.info(`Match found: "${polyMarket.title}" <-> "${bestMatch.opinionMarket.title}" (similarity: ${bestMatch.similarity.toFixed(2)})`);
       }
     }
 
@@ -29,9 +32,13 @@ export class MatchingService {
   private findBestMatch(polyMarket: NormalizedMarket, opinionMarkets: NormalizedMarket[]): MarketMatch | null {
     let bestMatch: MarketMatch | null = null;
     let bestSimilarity = 0;
+    const candidates: Array<{ title: string; similarity: number }> = [];
 
     for (const opinionMarket of opinionMarkets) {
       const similarity = this.calculateMarketSimilarity(polyMarket, opinionMarket);
+
+      // Collect top candidates for logging
+      candidates.push({ title: opinionMarket.title, similarity });
 
       if (similarity > bestSimilarity && similarity >= this.SIMILARITY_THRESHOLD) {
         const outcomeMatches = this.matchOutcomes(polyMarket.outcomes, opinionMarket.outcomes);
@@ -45,8 +52,22 @@ export class MatchingService {
             confidence: this.getConfidenceLevel(similarity),
             outcomeMatches
           };
+        } else if (similarity >= 0.95) {
+          // Log why high similarity markets don't match
+          logger.debug(`High similarity (${similarity.toFixed(2)}) but no outcome matches for "${polyMarket.title}"`);
+          logger.debug(`Polymarket outcomes: ${polyMarket.outcomes.map(o => o.name).join(', ')}`);
+          logger.debug(`Opinion outcomes: ${opinionMarket.outcomes.map(o => o.name).join(', ')}`);
         }
       }
+    }
+
+    // Log top 3 candidates if no match found
+    if (!bestMatch && candidates.length > 0) {
+      const topCandidates = candidates
+        .sort((a, b) => b.similarity - a.similarity)
+        .slice(0, 3);
+
+      logger.debug(`No match for "${polyMarket.title}". Top candidates: ${topCandidates.map(c => `"${c.title}" (${c.similarity.toFixed(2)})`).join(', ')}`);
     }
 
     return bestMatch;
@@ -58,19 +79,22 @@ export class MatchingService {
       this.normalizeText(market2.title)
     );
 
-    let categorySimilarity = 0;
+    // Only use category similarity if both markets have categories
     if (market1.category && market2.category) {
-      categorySimilarity = this.calculateStringSimilarity(
+      const categorySimilarity = this.calculateStringSimilarity(
         this.normalizeText(market1.category),
         this.normalizeText(market2.category)
       );
+
+      const weightedSimilarity =
+        (titleSimilarity * this.TITLE_WEIGHT) +
+        (categorySimilarity * this.CATEGORY_WEIGHT);
+
+      return weightedSimilarity;
     }
 
-    const weightedSimilarity =
-      (titleSimilarity * this.TITLE_WEIGHT) +
-      (categorySimilarity * this.CATEGORY_WEIGHT);
-
-    return weightedSimilarity;
+    // If one or both markets don't have categories, use title similarity only
+    return titleSimilarity;
   }
 
   private matchOutcomes(outcomes1: NormalizedOutcome[], outcomes2: NormalizedOutcome[]): OutcomeMatch[] {

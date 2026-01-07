@@ -4,8 +4,8 @@ import logger from '../utils/logger';
 import cache from '../utils/cache';
 
 interface OpinionApiResponse<T> {
-  code: number;
-  msg: string;
+  errno: number;
+  errmsg: string;
   result: T;
 }
 
@@ -46,34 +46,35 @@ export class OpinionClient {
   }
 
   private setupInterceptors(): void {
-    this.api.interceptors.request.use(
-      config => {
-        logger.info('=== Opinion API Request ===');
-        logger.info(`URL: ${config.url}`);
-        logger.info(`Method: ${config.method}`);
-        logger.info(`Headers: ${JSON.stringify(config.headers, null, 2)}`);
-        logger.info(`Params: ${JSON.stringify(config.params, null, 2)}`);
-        logger.info('===========================');
-        return config;
-      }
-    );
+    // this.api.interceptors.request.use(
+    //   config => {
+    //     logger.info('=== Opinion API Request ===');
+    //     logger.info(`URL: ${config.url}`);
+    //     logger.info(`Method: ${config.method}`);
+    //     logger.info(`Headers: ${JSON.stringify(config.headers, null, 2)}`);
+    //     logger.info(`Params: ${JSON.stringify(config.params, null, 2)}`);
+    //     logger.info('===========================');
+    //     return config;
+    //   }
+    // );
 
     this.api.interceptors.response.use(
       response => {
-        logger.info('=== Opinion API Response ===');
-        logger.info(`URL: ${response.config.url}`);
-        logger.info(`Status: ${response.status}`);
-        logger.info(`Data: ${JSON.stringify(response.data, null, 2)}`);
-        logger.info('============================');
+        // Only log orderbook requests for debugging
+        if (response.config.url?.includes('/token/orderbook')) {
+          logger.debug('=== Opinion Orderbook Response ===');
+          logger.debug(`Token ID: ${response.config.params?.token_id}`);
+          logger.debug(`Status: ${response.status}`);
+          logger.debug(`Data: ${JSON.stringify(response.data, null, 2)}`);
+          logger.debug('==================================');
+        }
         return response;
       },
       error => {
         logger.error('=== Opinion API Error ===');
         logger.error(`URL: ${error.config?.url}`);
         logger.error(`Method: ${error.config?.method}`);
-        logger.error(`Headers: ${JSON.stringify(error.config?.headers, null, 2)}`);
         logger.error(`Status: ${error.response?.status}`);
-        logger.error(`Status Text: ${error.response?.statusText}`);
         logger.error(`Error Message: ${error.message}`);
         logger.error(`Response Data: ${JSON.stringify(error.response?.data, null, 2)}`);
         logger.error('=========================');
@@ -93,7 +94,7 @@ export class OpinionClient {
     const cached = await cache.get<OpinionMarket[]>(cacheKey);
 
     if (cached) {
-      logger.debug('Returning cached Opinion markets');
+      // logger.debug('Returning cached Opinion markets');
       return cached;
     }
 
@@ -106,22 +107,48 @@ export class OpinionClient {
         ...params
       };
 
-      logger.info('Fetching Opinion markets', defaultParams);
+      logger.info('Fetching Opinion markets');
       const response = await this.api.get<OpinionApiResponse<OpinionMarketsResult>>('/market', {
         params: defaultParams
       });
 
-      if (response.data.code !== 0) {
-        throw new Error(`Opinion API error: ${response.data.msg}`);
+      if (response.data.errno !== 0) {
+        const errorMsg = `Opinion API returned error code ${response.data.errno}: ${response.data.errmsg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
       const markets = response.data.result.list;
+
+      // Log first yes/no market to see structure
+      if (markets.length > 0 && params?.page === 1) {
+        const yesNoMarket = markets.find(m => m.marketType === 0);
+        if (yesNoMarket) {
+          logger.info(`=== Opinion Yes/No Market Sample ===`);
+          logger.info(JSON.stringify(yesNoMarket, null, 2));
+          logger.info(`====================================`);
+        }
+      }
+
       await cache.set(cacheKey, markets, 60);
 
       logger.info(`Fetched ${markets.length} Opinion markets`);
       return markets;
     } catch (error) {
-      logger.error('Error fetching Opinion markets:', error);
+      if (axios.isAxiosError(error)) {
+        const errorDetails = {
+          message: error.message,
+          code: error.code,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        };
+        logger.error(`Axios error details: ${JSON.stringify(errorDetails, null, 2)}`);
+      } else if (error instanceof Error) {
+        logger.error(`Error fetching Opinion markets: ${error.message}`);
+      } else {
+        logger.error(`Error fetching Opinion markets: ${String(error)}`);
+      }
       throw error;
     }
   }
@@ -146,10 +173,14 @@ export class OpinionClient {
         }
       }
 
-      logger.info(`Fetched total ${allMarkets.length} Opinion markets`);
+      // logger.info(`Fetched total ${allMarkets.length} Opinion markets`);
       return allMarkets;
     } catch (error) {
-      logger.error('Error fetching all Opinion markets:', error);
+      if (error instanceof Error) {
+        logger.error(`Error fetching all Opinion markets: ${error.message}`);
+      } else {
+        logger.error(`Error fetching all Opinion markets: ${String(error)}`);
+      }
       return allMarkets;
     }
   }
@@ -163,19 +194,34 @@ export class OpinionClient {
     }
 
     try {
-      logger.debug(`Fetching orderbook for token ${tokenId}`);
+      // logger.debug(`Fetching orderbook for token ${tokenId}`);
       const response = await this.api.get<OpinionApiResponse<Orderbook>>('/token/orderbook', {
         params: { token_id: tokenId }
       });
 
-      if (response.data.code !== 0) {
-        throw new Error(`Opinion API error: ${response.data.msg}`);
+      if (response.data.errno !== 0) {
+        const errorMsg = `Opinion API returned error code ${response.data.errno}: ${response.data.errmsg || 'No message'}, Full response: ${JSON.stringify(response.data)}`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
       await cache.set(cacheKey, response.data.result, 30);
       return response.data.result;
     } catch (error) {
-      logger.error(`Error fetching orderbook for token ${tokenId}:`, error);
+      if (axios.isAxiosError(error)) {
+        const errorDetails = {
+          message: error.message,
+          code: error.code,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        };
+        logger.error(`Axios error for orderbook ${tokenId}: ${JSON.stringify(errorDetails, null, 2)}`);
+      } else if (error instanceof Error) {
+        logger.error(`Error fetching orderbook for token ${tokenId}: ${error.message}`);
+      } else {
+        logger.error(`Error fetching orderbook for token ${tokenId}: ${String(error)}`);
+      }
       return null;
     }
   }

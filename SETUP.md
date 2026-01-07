@@ -63,13 +63,16 @@ NODE_ENV=development
 REDIS_HOST=localhost
 REDIS_PORT=6379
 OPINION_API_KEY=your_actual_api_key_here
+OPINION_EOA_ADDRESS=your_eoa_address_here
 CACHE_TTL=60
 UPDATE_INTERVAL=30000
 MIN_PROFIT_THRESHOLD=0.01
 SIMILARITY_THRESHOLD=0.85
 ```
 
-**Important:** Replace `your_actual_api_key_here` with your real Opinion API key!
+**Important:**
+- Replace `your_actual_api_key_here` with your real Opinion API key!
+- Replace `your_eoa_address_here` with your Ethereum EOA (Externally Owned Account) address for Opinion API authentication
 
 ### 6. Start Redis (Optional)
 
@@ -258,6 +261,7 @@ WantedBy=multi-user.target
 | `REDIS_PORT` | 6379 | Redis server port |
 | `REDIS_PASSWORD` | - | Redis password (if required) |
 | `OPINION_API_KEY` | - | Opinion API key (required) |
+| `OPINION_EOA_ADDRESS` | - | EOA address for Opinion API auth (required) |
 | `CACHE_TTL` | 60 | Cache TTL in seconds |
 | `UPDATE_INTERVAL` | 30000 | Data update interval in ms |
 | `MIN_PROFIT_THRESHOLD` | 0.01 | Minimum profit % to show |
